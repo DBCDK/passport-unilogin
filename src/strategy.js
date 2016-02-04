@@ -6,9 +6,6 @@
  * Based on the work done by Jared Hanson in passport-locale -- https://github.com/jaredhanson/passport-local
  */
 
-/**
- * Module dependencies.
- */
 import crypto from 'crypto';
 import passport from 'passport-strategy';
 import {isEmpty, has} from 'lodash';
@@ -39,7 +36,6 @@ export default class Strategy extends passport.Strategy {
       throw new TypeError(`UniloginStrategy requires a 'uniloginBasePath' parameter in the options object. I.e. {uniloginBasePath: 'https://sso.emu.dk/unilogin/login.cgi'}`);
     }
     if (has(options, 'maxTicketAge') && typeof options.maxTicketAge !== 'number') {
-      console.log('if');
       throw new TypeError(`Only numbers are accepted in maxTicketAge. I.e. {maxTicketAge: 30} Minimum value is 1. If 0 0r below is given the check will be ignored.`);
     }
 
@@ -69,16 +65,31 @@ export default class Strategy extends passport.Strategy {
    */
   authenticate(req, options) {
     if (isEmpty(req.query)) {
-      this.requestNewUniLoginSession(req, options)
+      this.requestNewUniLoginSession(req, options);
     }
     else if (!isEmpty(req.query) && has(req.query, 'auth') && has(req.query, 'timestamp') && has(req.query, 'user')) {
-      return this.authenticateUniloginCallback(req);
+      this.authenticateUniloginCallback(req);
     }
     else {
       return this.fail({message: 'Bad request'}, 400);
     }
   }
 
+  /**
+   * Constructs the URL to redirect to at UNI-Login and request Passport to
+   * perform the actual redirect.
+   *
+   * An optional returURL can be given in the options object. If set it will be
+   * used as the address UNI-Login should redirect back to after successful
+   * authentication.
+   * If not set an URL pointing to the current location in the browser will be
+   * used as redirect URL.
+   *
+   * @param {Object} req
+   * @param {Object} options If returURL is present in the options object the
+   * value will be used as the url UNI-Login should redirect back to when
+   * authentication is complete.
+   */
   requestNewUniLoginSession(req, options) {
     const returURL = options.returURL || `${req.protocol}://${req.get('host')}${req.path}`;
     const path = encodeURIComponent(new Buffer(returURL).toString('base64'));
@@ -88,15 +99,29 @@ export default class Strategy extends passport.Strategy {
     this.redirect(redirectUrl);
   }
 
+  /**
+   * Method to authenticate the callback from UNI-Login after successful form
+   * submission at UNI-Login.
+   *
+   * By default the auth paramter will be verfied.
+   * If maxTicketAge is set to or above 1 the timestamp will also be verified to
+   * not be older than the given value.
+   *
+   * No matter the result of ther verfications a callback back to the appliction
+   * will be made, where actual tests on the error object should be made before
+   * considering it a successful login.
+   *
+   * @param {Object} req
+   */
   authenticateUniloginCallback(req) {
     const auth = req.query.auth;
     const timestamp = req.query.timestamp;
     const user = req.query.user;
 
     const authVerified = this.verifyTicket({auth: auth, timestamp: timestamp, user: user});
-    const timestampVerified = this.maxTicketAge >= 1 ? this.validateAgeOfTicket({auth: auth, timestamp: timestamp, user: user}) : {error: false, message: null};;
+    const timestampVerified = this.maxTicketAge >= 1 ? this.validateAgeOfTicket({auth: auth, timestamp: timestamp, user: user}) : {error: false, message: null};
 
-    const errorObject = {auth: authVerified, timestamp: timestampVerified};
+    const errorObject = !authVerified.error && !timestampVerified.error ? null : {auth: authVerified, timestamp: timestampVerified};
 
     this.callback(errorObject, req, {auth: auth, timestamp: timestamp, user: user, ltoken: req.query.ltoken}, this.verified.bind(this));
   }
@@ -108,7 +133,7 @@ export default class Strategy extends passport.Strategy {
    * If the configurable maxTicketAge is set to or above 0 the age of the ticket
    * will be calculated and verified against the value given in maxTicketAge.
    *
-   * @param {{auth: String, user: String, timestamp: String }} ticket
+   * @param {{auth: String, user: String, timestamp: Number }} ticket
    * @return {{error: boolean, message: String}}
    */
   verifyTicket(ticket) {
@@ -120,7 +145,7 @@ export default class Strategy extends passport.Strategy {
     const auth = ticket.auth;
     const token = this.md5(ticket.timestamp + this.secret + ticket.user);
 
-    if(auth !== token) {
+    if (auth !== token) {
       verification.error = true;
       verification.message = 'Auth/token calculation mismatch';
     }
@@ -131,11 +156,10 @@ export default class Strategy extends passport.Strategy {
   /**
    * Validate the age of the ticket against the configured maxTicketAge.
    *
-   * @param {{auth: String, user: String, timestamp: String }} ticket
+   * @param {{auth: String, user: String, timestamp: Number }} ticket
    * @return {{error: boolean, message: String}}
    */
   validateAgeOfTicket(ticket) {
-    console.log('validateAgeOfTicket');
     const timestamp = moment.utc(ticket.timestamp, 'YYYYMMDDHHmmss').format('X');
     const now = moment().utc().format('X');
 
@@ -144,7 +168,7 @@ export default class Strategy extends passport.Strategy {
       message: null
     };
 
-    if(parseInt(now) - parseInt(timestamp) >= this.maxTicketAge) {
+    if (parseInt(now, 10) - parseInt(timestamp, 10) >= this.maxTicketAge) {
       verification.error = true;
       verification.message = `Ticket timestamp has exceeded the value defined in maxTicketAge (${this.maxTicketAge})`;
     }
@@ -152,6 +176,16 @@ export default class Strategy extends passport.Strategy {
     return verification;
   }
 
+  /**
+   * The verified callback that will be passed to to the application where it
+   * should appropriately invoked depending on whether the application considers
+   * the login attempt a success or not.
+   *
+   * @param {*} err
+   * @param {*} user
+   * @param {String} info
+   * @return {*}
+   */
   verified(err, user, info) {
     if (err) {
       return this.error(err);
