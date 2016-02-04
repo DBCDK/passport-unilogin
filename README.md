@@ -40,6 +40,10 @@ An error object. If no errors the `null` is returned.
 The req object passed from express  
 3. ticket  
 The ticket returned from UNI-Login structured a as below:  
+4. done callback  
+Callback to passport to inform passport whether the authentification is valid or not.
+
+##### Ticket structure  
 ```js
   {
     auth: 'some hash token',
@@ -47,8 +51,6 @@ The ticket returned from UNI-Login structured a as below:
     user: 'UNI-Login username'
   }
 ```  
-4. done callback  
-Callback to passport to inform passport whether the authentification is valid or not.
 
 #### Implementation
 
@@ -89,7 +91,7 @@ For an actually example of usage see https://github.com/DBCDK/biblo/tree/master/
  
 #### Building
 The source code in `src/` is written in ES6 and transpiled using babel to ES5 and placed in `dist/` which is the code exposed to the application.
-Therefore, if not installed using `$ npm run install passport-unilogin` bu i.e. cloned from GitHub remember to execute `$ npm run build` before using the `passport-unilogin`module.
+Therefore, if not installed using `$ npm run install passport-unilogin` but i.e. cloned from GitHub remember to execute `$ npm run build` before using the `passport-unilogin`module.
 See the `scripts` clause in `package.json` for more handy scripts.
 
 #### Tests
