@@ -1,6 +1,6 @@
 {
   "name": "passport-unilogin",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "UNI-login authentication strategy for Passport",
   "main": "dist/index.js",
   "scripts": {
