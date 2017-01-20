@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @file
  * UNI-login authentication strategy for Passport and Node.js

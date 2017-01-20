@@ -1,5 +1,3 @@
-'use strict';
-
 import {assert} from 'chai';
 import Strategy from '../strategy';
 import crypto from 'crypto';
