@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = (wallaby) => {
   return {
     files: [
@@ -14,7 +12,7 @@ module.exports = (wallaby) => {
 
     compilers: {
       '**/*.js': wallaby.compilers.babel({
-        presets:['es2015']
+        presets: ['es2015']
       })
     },
 
