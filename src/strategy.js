@@ -65,14 +65,14 @@ export default class Strategy extends passport.Strategy {
    */
   authenticate(req, options) {
     if (isEmpty(req.query)) {
-      this.requestNewUniLoginSession(req, options);
+      return this.requestNewUniLoginSession(req, options);
     }
-    else if (!isEmpty(req.query) && has(req.query, 'auth') && has(req.query, 'timestamp') && has(req.query, 'user')) {
-      this.authenticateUniloginCallback(req);
+
+    if (!isEmpty(req.query) && has(req.query, 'auth') && has(req.query, 'timestamp') && has(req.query, 'user')) {
+      return this.authenticateUniloginCallback(req);
     }
-    else {
-      return this.fail({message: 'Bad request'}, 400);
-    }
+
+    return this.fail({message: 'Bad request'}, 400);
   }
 
   /**
@@ -193,7 +193,7 @@ export default class Strategy extends passport.Strategy {
     if (!user) {
       return this.fail(info);
     }
-    this.success(user, info);
+    return this.success(user, info);
   }
 
   /**
@@ -209,4 +209,3 @@ export default class Strategy extends passport.Strategy {
       .digest('hex');
   }
 }
-
