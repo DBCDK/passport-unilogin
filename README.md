@@ -1,6 +1,8 @@
 # passport-unilogin
-[![David](https://img.shields.io/david/DBCDK/passport-unilogin.svg?style=flat-square)](https://david-dm.org/DBCDK/passport-unilogin#info=dependencies)
-[![David](https://img.shields.io/david/dev/DBCDK/passport-unilogin.svg?style=flat-square)](https://david-dm.org/DBCDK/passport-unilogin#info=devDependencies)
+[![Build Status](https://travis-ci.org/DBCDK/passport-unilogin.svg?branch=master)](https://travis-ci.org/DBCDK/passport-unilogin)
+[![bitHound Overall Score](https://www.bithound.io/github/DBCDK/passport-unilogin/badges/score.svg)](https://www.bithound.io/github/DBCDK/passport-unilogin)
+[![bitHound Dependencies](https://www.bithound.io/github/DBCDK/passport-unilogin/badges/dependencies.svg)](https://www.bithound.io/github/DBCDK/passport-unilogin/master/dependencies/npm)
+[![bitHound Dev Dependencies](https://www.bithound.io/github/DBCDK/passport-unilogin/badges/devDependencies.svg)](https://www.bithound.io/github/DBCDK/passport-unilogin/master/dependencies/npm)
 
 ## Install
 
